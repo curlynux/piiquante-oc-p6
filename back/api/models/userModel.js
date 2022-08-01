@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import Schema from "mongoose";
+const Schema = mongoose.Schema
 
 var user = new Schema({
     fullName: {
@@ -26,3 +26,4 @@ var user = new Schema({
 
 user.methods.comparePassword = (password) => bcrypt.compareSync(password, this.hash_password);
 mongoose.model("User", user);
+export default user;

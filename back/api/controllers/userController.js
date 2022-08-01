@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 var User = mongoose.model("User");
 
-exports.register = (req, res) =>
+var register = (req, res) =>
 {
     var newUser = new User(req.body);
     newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
@@ -19,7 +19,7 @@ exports.register = (req, res) =>
     });
 }
 
-exports.sign_in = (req, res) =>
+var sign_in = (req, res) =>
 {
     User.findOne({
         email: req.body.email
@@ -32,7 +32,7 @@ exports.sign_in = (req, res) =>
     });
 }
 
-exports.loginRequired = (req, res, next) =>
+var loginRequired = (req, res, next) =>
 {
     if(req.user)
         next();
@@ -40,7 +40,7 @@ exports.loginRequired = (req, res, next) =>
         return res.status(401).json({ message: "utilisateur non autorisé !" });
 }
 
-exports.profile = (req, res, next) =>
+var profile = (req, res, next) =>
 {
     if(req.user)
     {
@@ -50,3 +50,5 @@ exports.profile = (req, res, next) =>
     else
         return res.status(401).json({ message: "token invalide" });
 }
+
+export default { register, sign_in, loginRequired, profile }
