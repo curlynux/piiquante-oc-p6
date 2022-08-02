@@ -5,9 +5,9 @@ var routes = (app) =>
 {
     app.route("/test1")
         .post(userTake.loginRequired, userTake.profile);
-    app.route("/test2")
+    app.route("/api/auth/signup")
         .post(userTake.register)
-    app.route("/test3")
+    app.route("/api/auth/signin")
         .post(userTake.sign_in);
 }
 

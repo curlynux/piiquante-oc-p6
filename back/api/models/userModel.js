@@ -24,6 +24,5 @@ var user = new Schema({
     }
 });
 
-user.methods.comparePassword = (password) => bcrypt.compareSync(password, this.hash_password);
 mongoose.model("User", user);
 export default user;
