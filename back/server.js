@@ -1,54 +1,48 @@
-import express from "express";
-import cors from "cors";
-const app = express();
-import user from "./api/models/userModel.js";
-import bodyParser from "body-parser";
-import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import routes from "./api/route/userRoute.js";
+const http = require("http");
+const express = require("express");
+const app = require("./app.js");
 
-const options = 
+const normalizePort = val => 
 {
-    socketTimeoutMS: 30000,
-    keepAlive: true
+    const port = parseInt(val, 10);
+    if(isNaN(port))
+        return val;
+    if(port >= 0)
+        return port;
+    return false;
 }
 
-const mongoURI = process.env.MONGODB_URI;
-mongoose.connect("mongodb://127.0.0.1:27017", options)
-.then(() => console.log("mongo est connecté !"), (err) => {if(err) throw err});
+const port = normalizePort(process.env.PORT || "3000");
+app.set("port", port);
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
-
-app.use((req, res, next) => 
+const errorHandler = error => 
 {
-    if(req.headers && req.headers.authorization && req.headers.authorization.split(" ")[0] === "JWT")
+    if(error.syscall !== "listen")
+        throw error;
+    const addr = server.address();
+    const bind = typeof addr === "string" ? "pipe" + addr: "port" + port;
+    switch(error.code)
     {
-        jwt.verify(req.headers.authorization.split(" ")[1], "RESTFULAPIs", (err, decode) => 
-        {
-            if(err) req.user = undefined;
-            req.user = decode
-            next();
-
-        }); 
-    } else {
-        req.user = undefined;
-        next();
+        case "EACCES":
+            console.error(`${bind} haut privilege requis`);
+            process.exit(1);
+            break;
+        case "EADDRINUSE":
+            console.error(`${bind} is already in use`);
+            process.exit(1);
+            break;
+        default:
+            throw error;
     }
-});
+}
+const server = http.createServer(app);
 
-routes(app);
-app.use((req, res) => 
+server.on("error", errorHandler);
+server.on("listening", () => 
 {
-    res.status(404).send({ url: req.originalUrl + "not found" })
+    const address = server.address();
+    const bind = typeof addr === "string" ? "pipe" + addr: "port" + port;
+
 });
-
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.get("/", (req, res) => res.json({message: "salut curly !"}));
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => console.log(`server is listening at: ${PORT}`));
-export default app;
+server.listen(port);
+console.log(`server is ready ! on port ${port}`);

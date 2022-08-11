@@ -1,13 +1,9 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+
+const mongoose = require("mongoose"); 
+const uniqueValidator = require("mongoose-unique-validator")
 const Schema = mongoose.Schema
 
 var user = new Schema({
-    fullName: {
-        type: String,
-        trim: true,
-        required: true
-    },
     email: {
         type: String,
         unique: true,
@@ -15,14 +11,11 @@ var user = new Schema({
         trim: true,
         required: true
     },
-    hash_password: {
+    password: {
         type: String
-    },
-    created: {
-        type: Date,
-        default: Date.now
     }
 });
 
+user.plugin(uniqueValidator);
 mongoose.model("User", user);
-export default user;
+module.exports = user;

@@ -1,14 +1,13 @@
-import userTake from "../controllers/userController.js";
+const userTake = require("../controllers/userController.js");
+const express = require("express");
+const router = express.Router();
+const bodyParser = require("body-parser");
+
+var jsonParser = bodyParser.json();
+var urlencodedParser = bodyParser.urlencoded({extended: false});
+router.post("/test1", urlencodedParser, jsonParser, () => userTake.loginRequired, () => userTake.profile)
+router.post("/signup", urlencodedParser, jsonParser, () => userTake.register)
+router.post("/login", urlencodedParser, jsonParser, () => userTake.sign_in)
 
 
-var routes = (app) =>
-{
-    app.route("/test1")
-        .post(userTake.loginRequired, userTake.profile);
-    app.route("/api/auth/signup")
-        .post(userTake.register)
-    app.route("/api/auth/signin")
-        .post(userTake.sign_in);
-}
-
-export default routes;
+module.exports = router;

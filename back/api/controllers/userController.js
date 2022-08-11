@@ -1,61 +1,72 @@
-import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
-import bcrypt, { hash } from "bcrypt";
-var User = mongoose.model("User");
+const express = require("express");
+const app = express();
+const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
+const { application } = require("express");
+const { urlencoded } = require("body-parser");
 
-var register = (req, res) =>
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+
+exports.signup = (req, res, next) =>
 {
+    console.log(`THIS IS BODY: ${req.body.email}`);
+    console.log(req.body);
     bcrypt.hash(req.body.password, 10)
     .then(hash => 
     {
         const user = new User({email: req.body.email, password: hash});
         user.save()
-        .then(() => res.status(201).json({message: "utilisateur crée !"}))
-        .catch(error => res.status(500).json({error}));
+        .then(() => res.status(201).json({message: "utilisateur créé !"}))
+        .catch((error) => 
+        {
+            console.error(`c'est une bad request 1 ! ${error}`)
+            res.status(400).json({error})
+        });
     })
-}
-
-var sign_in = (req, res) =>
-{
-    User.findOne({ email: req.body.email }, 
-    (err, user) => 
+    .catch((error) => 
     {
-        if(err) throw err;
-        if(!user || !user.comparePassword(req.body.password))
-            return res.status(401).json({ message: "auth impossible ! invalid user ou mdp" });
-        bcrypt.compare(req.body.password, user.password)
-        .then(valid => 
-            {
-                if(!valid) return res.status(401).json({error: "mdp incorrect"})
-                res.status(200).json({
-                    userId: user._id,
-                    token: jwt.sign({userId: user._id},
-                        "RANDOM_TOKEN_SECRET",
-                        {expiresIn: '24h'}
-                    )
-                });
-            }).catch(err => res.status(500).json({err}))
-        return res.json({ token: jwt.sign({ email: user.email, fullName: user.fullName, _id: user._id }, "RESTFULAPIs") });
+        res.status(500).json({error})
     });
 }
 
-var loginRequired = (req, res, next) =>
+exports.login = (req, res, next) =>
 {
-    if(req.user)
-        next();
-    else
-        return res.status(401).json({ message: "utilisateur non autorisé !" });
-}
-
-var profile = (req, res, next) =>
-{
-    if(req.user)
+    
+    console.log(req.headers);
+    User.findOne({email: req.body.email})
+    .then(user => 
     {
-        res.send(req.user);
-        next();
-    }
-    else
-        return res.status(401).json({ message: "token invalide" });
+        if(!user === null)
+            return res.status(401).json({message: "email/mdp incorrect"})
+        else
+        {
+            bcrypt.compare(req.body.password, user.password)
+            .then(valid => 
+            {
+                if(!valid)
+                    return res.status(401).json({message: "email/mdp incorrect"})
+                else
+                {
+                    res.status(200).json({
+                        userId: user._id, token: jwt.sign({ userId: user._id },
+                        "RANDOM_TOKEN_SECRET", {expiresIn: '24h'})
+                    });   
+                }
+            })
+            .catch((error) => 
+            {
+                console.log(user);
+                console.error(`cet une erreur 2 ! ${error}`)
+                res.status(500).json({error})
+            });
+        }
+    })
+    .catch((error) => 
+    {
+        console.error(`cet une erreur 3 ! ${error}`)
+        res.status(500).json({error})
+    });
 }
-
-export default { register, sign_in, loginRequired, profile }
