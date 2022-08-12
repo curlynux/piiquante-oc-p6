@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
-const User = require("../models/userModel");
+const User = require("../../api/models/userModel.js")
 const jwt = require("jsonwebtoken");
 const { application } = require("express");
 const { urlencoded } = require("body-parser");
@@ -12,12 +13,12 @@ app.use(bodyParser.json());
 
 exports.signup = (req, res, next) =>
 {
-    console.log(`THIS IS BODY: ${req.body.email}`);
-    console.log(req.body);
+    console.log(req.body.email);
     bcrypt.hash(req.body.password, 10)
     .then(hash => 
     {
         const user = new User({email: req.body.email, password: hash});
+        console.log(hash);
         user.save()
         .then(() => res.status(201).json({message: "utilisateur créé !"}))
         .catch((error) => 
@@ -28,14 +29,13 @@ exports.signup = (req, res, next) =>
     })
     .catch((error) => 
     {
+        console.log(error);
         res.status(500).json({error})
     });
 }
 
 exports.login = (req, res, next) =>
 {
-    
-    console.log(req.headers);
     User.findOne({email: req.body.email})
     .then(user => 
     {
