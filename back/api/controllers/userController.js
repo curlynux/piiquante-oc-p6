@@ -1,12 +1,9 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../../api/models/userModel.js")
 const jwt = require("jsonwebtoken");
-const { application } = require("express");
-const { urlencoded } = require("body-parser");
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());

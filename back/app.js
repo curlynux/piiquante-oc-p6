@@ -1,12 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./api/route/userRoute");
+const saucesRoutes = require("./api/route/sauces")
 const cors = require("cors");
 
 const app = express();
 app.use(cors())
 
-app.use("/api/auth", userRoutes)
+app.use("/api/auth", userRoutes);
+app.use("/api/sauces", saucesRoutes)
 app.use((req, res, next) => 
 {
     res.setHeader("Access-Control-Allow-Origin", "*");
