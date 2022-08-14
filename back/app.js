@@ -25,5 +25,5 @@ mongoose.connect("mongodb+srv://spartan:spartan@piiquante.414gato.mongodb.net/?r
 .catch(() => console.log("connexion a mongo echoué !"));
 
 app.use(express.json());
-
+app.use("/images", express.static("images"))
 module.exports = app;
