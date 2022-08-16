@@ -46,19 +46,24 @@ exports.modifySauce = (req, res, next) =>
           res.status(403).json({ error: "Unauthorized request" });
         } else if (sauce.userId == req.auth.userId) {
           const filename = sauce.imageUrl.split("/images/")[1];
-          fs.unlink(`images/${filename}`, () => {
-            const sauceObject = req.file
-              ? {
-                  ...JSON.parse(req.body.sauce),
-                  imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
-                }
-              : { ...req.body };
-            Sauces.updateOne({ _id: req.params.id },
-              { ...sauceObject, _id: req.params.id }
-            )
-              .then(() => res.status(200).json({ message: "Sauce modifiée." }))
-              .catch((error) => res.status(400).json({ error }));
-          });
+          if(req.file )
+          {
+            fs.unlink(`images/${filename}`, () => {
+              const sauceObject = req.file
+                ? {
+                    ...JSON.parse(req.body.sauce),
+                    imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+                  }
+                : { ...req.body };
+              Sauces.updateOne({ _id: req.params.id },
+                { ...sauceObject, _id: req.params.id }
+              )
+                .then(() => res.status(200).json({ message: "Sauce modifiée." }))
+                .catch((error) => res.status(400).json({ error }));
+            });
+          }
+          Sauces.updateOne({ _id: req.params.id }, req.body);
+          
         }
       })
       .catch((error) => res.status(400).json({ error }));
@@ -104,7 +109,7 @@ exports.likeSauce = (req, res, next) =>
           sauce.dislikes--;
         }
         sauce.usersLiked.push(req.body.userId);
-        sauce.like++;
+        sauce.likes++;
     }
     if(req.body.like === -1)
     {
@@ -131,7 +136,9 @@ exports.likeSauce = (req, res, next) =>
         sauce.dislikes--;
       }
     }
+    sauce.save();
     Sauces.updateOne({_id: req.params.id}, sauce)
+    
     .then(() => res.status(200).json({message: "like enregistré !"}))
   });
 }
